@@ -1,0 +1,164 @@
+{% load custom_filters %}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Resultado</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 40px;
+      background-color: #a2c0ed;
+      color: #333;
+    }
+
+    h2, h3 {
+      color: #2c3e50;
+    }
+
+    .error {
+      background-color: #ffe6e6;
+      color: #c0392b;
+      border: 1px solid #e74c3c;
+      padding: 15px;
+      border-radius: 5px;
+      font-weight: bold;
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    th, td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #ddd;
+      text-align: center;
+    }
+
+    th {
+      background-color: #3498db;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .button {
+      display: inline-block;
+      margin-top: 20px;
+      padding: 10px 20px;
+      background-color: #2980b9;
+      color: white;
+      text-decoration: none;
+      border-radius: 5px;
+      transition: background-color 0.3s;
+    }
+
+    .button:hover {
+      background-color: #1c5980;
+    }
+
+    img {
+      margin-top: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>Resultado</h2>
+
+  {% if error %}
+    <div class="error">
+      ⚠️ Error: {{ error }}
+    </div>
+    <a href="{% url 'index' %}" class="button">Volver al formulario</a>
+
+  {% else %}
+    <p><strong>Raíz aproximada:</strong> {{ raiz }}</p>
+
+    <h3>Tabla de iteraciones:</h3>
+    <table>
+      <tr>
+        <th>Iteración</th>
+
+        {% if metodo == 'biseccion' %}
+          <th>a</th><th>b</th><th>c</th><th>f(c)</th><th>Error</th>
+
+        {% elif metodo == 'newton' %}
+          <th>x</th><th>f(x)</th><th>f'(x)</th><th>Xn</th><th>Error</th>
+
+        {% elif metodo == 'newton_mod' %}
+          <th>x</th><th>f(x)</th><th>f'(x)</th><th>f''(x)</th><th>x₁</th><th>Error</th>
+        {% endif %}
+      </tr>
+
+      {% for fila in tabla %}
+        <tr>
+          <td>{{ fila.i }}</td>
+
+          {% if metodo == 'biseccion' %}
+            <td>{{ fila.a }}</td>
+            <td>{{ fila.b }}</td>
+            <td>{{ fila.c }}</td>
+            <td>{{ fila|get_item:"f(c)" }}</td>
+            <td>
+              {% if fila|get_item:"error (%)" != None %}
+                {{ fila|get_item:"error (%)"|floatformat:4 }}%
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+          {% elif metodo == 'newton' %}
+            <td>{{ fila.x }}</td>
+            <td>{{ fila|get_item:"f(x)" }}</td>
+            <td>{{ fila|get_item:"f'(x)" }}</td>
+            <td>{{ fila.x1 }}</td>
+            <td>
+              {% if fila|get_item:"error (%)" != None %}
+                {{ fila|get_item:"error (%)"|floatformat:4 }}%
+              {% else %}
+                -
+              {% endif %}
+            </td>
+
+          {% elif metodo == 'newton_mod' %}
+            <td>{{ fila.x }}</td>
+            <td>{{ fila|get_item:"f(x)" }}</td>
+            <td>{{ fila|get_item:"f'(x)" }}</td>
+            <td>{{ fila|get_item:"f''(x)" }}</td>
+            <td>{{ fila.x1 }}</td>
+            <td>
+              {% if fila|get_item:"error (%)" != None %}
+                {{ fila|get_item:"error (%)"|floatformat:4 }}%
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          {% endif %}
+        </tr>
+      {% endfor %}
+    </table>
+
+    <a href="{% url 'index' %}" class="button">Calcular otra raíz</a>
+  {% endif %}
+
+  {% if grafica_url %}
+    <h3>Gráfica del polinomio:</h3>
+    <img src="{{ grafica_url }}" alt="Gráfica del polinomio">
+  {% endif %}
+
+</body>
+</html>
